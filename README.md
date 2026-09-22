@@ -135,8 +135,18 @@ same code; being unlocked is per-device, per-session. Viewing is never gated.
 
 Add a free [Google AI Studio](https://aistudio.google.com/apikey) key at
 **Setup → Sync, PIN and data → AI logging** and a one-line box appears on Today,
-Diet and Gym. No billing account is needed. Without a key the box does not
-render and nothing is sent anywhere.
+Diet and Gym. Without a key the box does not render and nothing is sent
+anywhere.
+
+**You do not pick a model when creating the key** — a Gemini key is
+model-agnostic, and the app names the model on each request. What decides
+whether you pay is the *project*: Google's free tier is "an active project or
+free trial", and linking a billing account moves you to Tier 1 and starts
+charging. So create the key in a project with **no billing account linked**.
+
+The model is a dropdown in Settings, defaulting to `gemini-3.8-flash`, with the
+other free-tier models listed and a free-text box for anything Google adds
+later — so a model being retired is a dropdown away, not a redeploy.
 
 What it does: turns a sentence into a draft entry you confirm ("2 idli and 2
 eggs with sambar", "bench forty by eight, eight, seven", "waist 86"), and

@@ -11,7 +11,7 @@ import {
   Upload,
 } from 'lucide-react'
 import { PageTransition } from '../components/PageTransition'
-import { Field, TextInput } from '../components/ui/Field'
+import { Field, Select, TextInput } from '../components/ui/Field'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { useData } from '../hooks/useData'
@@ -30,7 +30,7 @@ import {
   verifyToken,
 } from '../services/github'
 import { local } from '../services/local'
-import { MODEL } from '../services/ai'
+import { DEFAULT_MODEL, FREE_MODELS, activeModel } from '../services/ai'
 import { todayKey } from '../utils/date'
 
 export function Settings() {
@@ -45,6 +45,10 @@ export function Settings() {
   const [confirmReset, setConfirmReset] = useState(false)
   const [aiKey, setAiKeyInput] = useState(local.getSnapshot().aiKey ?? '')
   const [aiMsg, setAiMsg] = useState<string | null>(null)
+  const [aiModel, setAiModelInput] = useState(activeModel())
+  const [customModel, setCustomModel] = useState(
+    FREE_MODELS.includes(activeModel() as never) ? '' : activeModel(),
+  )
   const fileRef = useRef<HTMLInputElement>(null)
 
   const saveToken = async () => {
@@ -170,7 +174,7 @@ export function Settings() {
         <p className="text-xs text-slate-400">
           With a Google AI Studio key you can log in your own words &mdash; &ldquo;2 idli and 2
           eggs&rdquo;, &ldquo;bench 40 by 8, 8, 7&rdquo; &mdash; and ask questions about your logs.
-          The free tier needs no billing account. Model: <code className="text-xs">{MODEL}</code>.
+          The free tier needs no billing account.
         </p>
 
         <Field
@@ -185,6 +189,53 @@ export function Settings() {
             aria-label="Gemini API key"
           />
         </Field>
+
+        <Field
+          label="Model"
+          hint="All of these are free of charge. Pick another if Google stops serving this one."
+        >
+          <Select
+            value={customModel ? 'custom' : aiModel}
+            aria-label="Gemini model"
+            onChange={(e) => {
+              if (e.target.value === 'custom') {
+                setCustomModel(aiModel)
+                return
+              }
+              setCustomModel('')
+              setAiModelInput(e.target.value)
+              local.setAiModel(e.target.value)
+              setAiMsg(`Now using ${e.target.value}.`)
+            }}
+          >
+            {FREE_MODELS.map((m) => (
+              <option key={m} value={m}>
+                {m}
+                {m === DEFAULT_MODEL ? ' (default)' : ''}
+              </option>
+            ))}
+            <option value="custom">Something else…</option>
+          </Select>
+        </Field>
+
+        {customModel !== '' && (
+          <Field label="Model name" hint="For a model added after this app was built.">
+            <TextInput
+              value={customModel}
+              onChange={(e) => setCustomModel(e.target.value)}
+              onBlur={() => {
+                const v = customModel.trim()
+                if (v) {
+                  local.setAiModel(v)
+                  setAiModelInput(v)
+                  setAiMsg(`Now using ${v}.`)
+                }
+              }}
+              placeholder={DEFAULT_MODEL}
+              aria-label="Custom model name"
+            />
+          </Field>
+        )}
 
         <div className="flex gap-2">
           <button
@@ -215,6 +266,11 @@ export function Settings() {
           <p className="mt-2 text-xs text-slate-500">
             <strong>Sent:</strong> the sentence you type, your food and exercise library, and the
             names of your meal slots and workout days.
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            <strong>Staying free:</strong> the free tier belongs to the Google Cloud project, not
+            the model &mdash; create the key in a project with <em>no billing account linked</em>.
+            Linking one moves you to a paid tier.
           </p>
           <p className="mt-1 text-xs text-slate-500">
             <strong>Never sent:</strong> weight, waist or hip measurements, what either of you

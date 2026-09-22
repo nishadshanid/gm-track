@@ -15,6 +15,9 @@ interface DeviceState {
   /** Gemini API key for the AI layer. Same trust model as ghToken: this
    *  browser only, never in the build, never committed. */
   aiKey?: string
+  /** Which model to talk to. Device state rather than AppData, like the theme:
+   *  a phone may be on a different key with different models available. */
+  aiModel?: string
 }
 
 function read(): DeviceState {
@@ -57,4 +60,6 @@ export const local = {
   clearToken: () => set({ ghToken: undefined }),
   setAiKey: (aiKey: string) => set({ aiKey }),
   clearAiKey: () => set({ aiKey: undefined }),
+  setAiModel: (aiModel: string) => set({ aiModel }),
+  clearAiModel: () => set({ aiModel: undefined }),
 }

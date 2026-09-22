@@ -90,6 +90,20 @@ and the app is byte-for-byte what it was.
 - **Failure writes nothing.** A rejected key surfaces an error and leaves the
   store untouched.
 
+## The model is data, not a constant
+
+Which models are free changes at Google's end, and a key is not guaranteed to be
+served every model, so pinning one in code turned "Google retired that" into an
+opaque API error and a redeploy. `activeModel()` resolves it per call from
+device state, Settings offers the free-tier list plus a free-text box, and the
+default is unchanged — a device that has never chosen one still sends
+`gemini-3.8-flash`, verified in the browser.
+
+Worth recording alongside it: the free tier belongs to the **Google Cloud
+project**, not the model. Google's wording is "Active project or free trial" for
+Free and "Set up and link an active billing account" for Tier 1. The key must be
+created in a project with no billing linked.
+
 ## A caveat worth keeping
 
 One numeric example in a tool description ("62.4 this morning") once matched a

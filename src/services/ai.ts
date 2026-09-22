@@ -214,7 +214,27 @@ function toIntent(name: string, args: Record<string, unknown>): AiIntent {
   }
 }
 
-export const MODEL = 'gemini-3.8-flash'
+/**
+ * The model, as data rather than a constant.
+ *
+ * Which models are free changes at Google's end, and a key is not guaranteed to
+ * be served every model. Pinning one in code turns "Google retired that" into
+ * an opaque API error and a redeploy; a Settings choice turns it into a
+ * dropdown.
+ */
+export const DEFAULT_MODEL = 'gemini-3.8-flash'
+
+/** Free of charge on Google's pricing page at the time of writing. */
+export const FREE_MODELS = [
+  'gemini-3.8-flash',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-2.5-flash',
+] as const
+
+export function activeModel(): string {
+  return local.getSnapshot().aiModel?.trim() || DEFAULT_MODEL
+}
 
 export const geminiProvider: AiProvider = {
   name: 'Gemini',
@@ -230,7 +250,7 @@ export const geminiProvider: AiProvider = {
     const ai = new GoogleGenAI({ apiKey })
 
     const interaction = await ai.interactions.create({
-      model: MODEL,
+      model: activeModel(),
       input: `${systemPrompt(ctx)}\n\n---\nThe person said: ${input}`,
       tools: TOOLS as never,
     })
