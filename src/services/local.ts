@@ -12,6 +12,9 @@ interface DeviceState {
   activePersonId?: string
   theme?: 'light' | 'dark'
   ghToken?: string
+  /** Gemini API key for the AI layer. Same trust model as ghToken: this
+   *  browser only, never in the build, never committed. */
+  aiKey?: string
 }
 
 function read(): DeviceState {
@@ -52,4 +55,6 @@ export const local = {
   setTheme: (theme: 'light' | 'dark') => set({ theme }),
   setToken: (ghToken: string) => set({ ghToken }),
   clearToken: () => set({ ghToken: undefined }),
+  setAiKey: (aiKey: string) => set({ aiKey }),
+  clearAiKey: () => set({ aiKey: undefined }),
 }

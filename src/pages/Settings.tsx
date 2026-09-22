@@ -6,6 +6,7 @@ import {
   KeyRound,
   Lock,
   RefreshCw,
+  Sparkles,
   Trash2,
   Upload,
 } from 'lucide-react'
@@ -28,6 +29,8 @@ import {
   setToken,
   verifyToken,
 } from '../services/github'
+import { local } from '../services/local'
+import { MODEL } from '../services/ai'
 import { todayKey } from '../utils/date'
 
 export function Settings() {
@@ -40,6 +43,8 @@ export function Settings() {
   const [checking, setChecking] = useState(false)
   const [pin, setPinInput] = useState('')
   const [confirmReset, setConfirmReset] = useState(false)
+  const [aiKey, setAiKeyInput] = useState(local.getSnapshot().aiKey ?? '')
+  const [aiMsg, setAiMsg] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const saveToken = async () => {
@@ -158,6 +163,67 @@ export function Settings() {
           then everything stays in this browser.
         </div>
       )}
+
+      {/* ── AI ─────────────────────────────────────────────────────────── */}
+      <SectionHeader title="AI logging" />
+      <div className="card space-y-3">
+        <p className="text-xs text-slate-400">
+          With a Google AI Studio key you can log in your own words &mdash; &ldquo;2 idli and 2
+          eggs&rdquo;, &ldquo;bench 40 by 8, 8, 7&rdquo; &mdash; and ask questions about your logs.
+          The free tier needs no billing account. Model: <code className="text-xs">{MODEL}</code>.
+        </p>
+
+        <Field
+          label="Gemini API key"
+          hint="Stored in this browser only, like the GitHub token. Never in the build, never committed."
+        >
+          <TextInput
+            type="password"
+            value={aiKey}
+            onChange={(e) => setAiKeyInput(e.target.value)}
+            placeholder="AIza…"
+            aria-label="Gemini API key"
+          />
+        </Field>
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className="btn-primary flex-1"
+            onClick={() => {
+              const v = aiKey.trim()
+              if (v) {
+                local.setAiKey(v)
+                setAiMsg('Saved. The log-or-ask box now appears on Today, Diet and Gym.')
+              } else {
+                local.clearAiKey()
+                setAiMsg('Key removed. The AI box is hidden and nothing is sent anywhere.')
+              }
+            }}
+          >
+            <Sparkles size={15} /> {aiKey.trim() ? 'Save key' : 'Remove key'}
+          </button>
+        </div>
+        {aiMsg && <p className="text-xs text-slate-400">{aiMsg}</p>}
+
+        <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
+          <p className="flex items-start gap-1.5 text-xs font-semibold">
+            <AlertTriangle size={13} className="mt-0.5 flex-none text-warning" />
+            Google&rsquo;s free tier uses what it receives to improve their products, so this app
+            sends it as little as possible.
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            <strong>Sent:</strong> the sentence you type, your food and exercise library, and the
+            names of your meal slots and workout days.
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            <strong>Never sent:</strong> weight, waist or hip measurements, what either of you
+            actually ate or lifted, water, steps, targets or notes. Questions about your logs are
+            answered on this device &mdash; the model is told which figure to look up, not what it
+            says.
+          </p>
+        </div>
+      </div>
 
       {/* ── PIN ────────────────────────────────────────────────────────── */}
       <SectionHeader title="Edit PIN" />

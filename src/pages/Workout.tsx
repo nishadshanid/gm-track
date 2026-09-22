@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import type { Exercise, WorkoutDayTemplate } from '../types'
 import { PageTransition } from '../components/PageTransition'
+import { AiBar } from '../components/ai/AiBar'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Sheet } from '../components/ui/Sheet'
 import { SearchList } from '../components/ui/SearchList'
@@ -101,6 +102,8 @@ export function Workout() {
           </button>
         </div>
       </header>
+
+      <AiBar date={date} placeholder={'Log sets — "bench 40 by 8, 8, 7"'} />
 
       {!session ? (
         <div className="mt-5 space-y-3">

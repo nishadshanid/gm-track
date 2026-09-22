@@ -271,6 +271,7 @@ reads the stored record inside the call, so consecutive mutations compose.
 | 6 | [Coaching engine](phase-6.md) | "Add 200 kcal" suggestion with a working Apply |
 | 7 | [PIN + GitHub sync](phase-7.md) | Two devices log at once, nothing lost |
 | 8 | [Deploy + polish](phase-8.md) | Installed on both phones from a Pages URL |
+| 9 | [The AI layer](phase-9.md) | Say "2 idli and 2 eggs" instead of tapping it in |
 
 Everything before Phase 7 runs on the localStorage adapter.
 

@@ -33,6 +33,9 @@ switch in the header.
   hold everything"*, *"Trim about 125 kcal — not 500, or walk more instead."*
   Every card shows the weigh-ins and windows it was computed from, and nothing
   changes a target without an explicit tap.
+- **AI logging** (optional) — type or dictate "2 idli and 2 eggs with sambar"
+  and get a draft to confirm; ask "how much protein last week?" and get an
+  answer computed on your device. Off unless you add a key.
 - **Setup** — everything above is data. People, targets, meal slots and their
   options, foods and their macros, exercises, workout days, the weekly schedule
   and the coaching rules are all editable in the app.
@@ -40,7 +43,8 @@ switch in the header.
 ## Tech
 
 React 18 · Vite · TypeScript · Tailwind · HashRouter · framer-motion ·
-lucide-react. No backend, no build-time secrets, no analytics.
+lucide-react, plus `@google/genai` loaded lazily for the optional AI layer. No
+backend, no build-time secrets, no analytics.
 
 ```bash
 npm install
@@ -127,6 +131,35 @@ It does not protect the data. Anyone holding the GitHub token can read
 everything. The PIN hash is stored in the shared file so both phones accept the
 same code; being unlocked is per-device, per-session. Viewing is never gated.
 
+## The AI layer (optional)
+
+Add a free [Google AI Studio](https://aistudio.google.com/apikey) key at
+**Setup → Sync, PIN and data → AI logging** and a one-line box appears on Today,
+Diet and Gym. No billing account is needed. Without a key the box does not
+render and nothing is sent anywhere.
+
+What it does: turns a sentence into a draft entry you confirm ("2 idli and 2
+eggs with sambar", "bench forty by eight, eight, seven", "waist 86"), and
+answers questions about your logs.
+
+**What is sent, and what is not.** Gemini's free tier uses what it receives to
+improve Google's products, so the app sends as little as it can:
+
+| Sent | Never sent |
+|---|---|
+| The sentence you typed | Weight, waist, hip |
+| Your food and exercise library | What either of you actually ate or lifted |
+| Meal slot and workout day names | Water, steps, targets, notes |
+
+Questions are answered **on your device**: the model is told which figure to
+look up, not what it says, so asking about your data does not send your data.
+The boundary lives in one file, `src/utils/aiContext.ts`, and is asserted
+against the real outgoing request in the tests.
+
+Nothing is written on the model's say-so. Names are resolved against your own
+library — an invented food is flagged as unrecognised rather than logged — and
+every entry is a draft you approve.
+
 ## Deploying
 
 Push to `main` and the workflow in `.github/workflows/deploy.yml` runs `lint`
@@ -158,6 +191,14 @@ server rewrites. Open the Pages URL on each phone and **Add to Home Screen** —
   still outstanding.
 - **This is not medical advice.** It applies the rules from the plans it was
   built for, to the data you give it.
+- **The AI layer is a translator, not a coach.** It converts words into entries
+  and questions into lookups. Every number it shows is computed by the same
+  tested code the screens use — the model does not decide what you should eat,
+  and the coaching rules in `utils/coach.ts` stay deterministic and explainable.
+- **A browser-held API key is a real trade-off.** Google's own docs advise
+  against it. On a free-tier key the blast radius is rate limits rather than
+  money, which is why it is acceptable here; do not paste a billing-enabled key
+  into a phone browser.
 
 ## Layout
 

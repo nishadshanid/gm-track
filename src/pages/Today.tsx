@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Users } from 'lucide-react'
 import { PageTransition } from '../components/PageTransition'
+import { AiBar } from '../components/ai/AiBar'
 import { EmptyState } from '../components/ui/EmptyState'
 import { PersonDayCard } from '../components/daily/PersonDayCard'
 import { WaterRing } from '../components/daily/WaterRing'
@@ -64,6 +65,8 @@ export function Today() {
           </button>
         </div>
       </header>
+
+      <AiBar date={date} placeholder={'Log or ask — "how much protein last week?"'} />
 
       <div className="mt-5 space-y-3">
         {people.map((p) => (

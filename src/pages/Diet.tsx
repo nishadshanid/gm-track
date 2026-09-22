@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronLeft, ChevronRight, RefreshCw, UtensilsCrossed } from 'lucide-react'
 import type { Food, LoggedItem, MealLog, MealOption, MealSlot } from '../types'
 import { PageTransition } from '../components/PageTransition'
+import { AiBar } from '../components/ai/AiBar'
 import { SlotCard } from '../components/diet/SlotCard'
 import { DayTotals } from '../components/diet/DayTotals'
 import { PortionSheet } from '../components/diet/PortionSheet'
@@ -80,6 +81,8 @@ export function Diet() {
           </button>
         </div>
       </header>
+
+      <AiBar date={date} placeholder={'Log food — "2 idli, 2 eggs and sambar"'} />
 
       {target ? (
         <div className="mt-5">
