@@ -1,0 +1,59 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    # Every logged set is a commit to the data file. Rebuilding the site for
+    # each one would burn Actions minutes and queue deploys behind each other,
+    # so data writes are ignored here.
+    paths-ignore:
+      - 'data.json'
+      - 'archive/**'
+      - 'docs/**'
+      - '**.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+        env:
+          # Repository Variables, not Secrets: these are coordinates, not
+          # credentials. The token never touches the build — each phone pastes
+          # its own at /settings, and it stays in that browser.
+          # Settings -> Secrets and variables -> Actions -> Variables.
+          VITE_GH_OWNER: ${{ vars.VITE_GH_OWNER }}
+          VITE_GH_REPO: ${{ vars.VITE_GH_REPO }}
+          VITE_GH_BRANCH: ${{ vars.VITE_GH_BRANCH }}
+          VITE_GH_PATH: ${{ vars.VITE_GH_PATH }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
