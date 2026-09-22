@@ -55,17 +55,20 @@ npm run build
 All state is one JSON object. On its own, the app keeps it in `localStorage` and
 works entirely offline — that is a complete, usable setup for one device.
 
-To share data between two phones, point it at a **private** GitHub repo:
+To share data between two phones, point it at a **private** GitHub repo — a
+different one from this code repo:
 
-1. Create a private repo, e.g. `gm2-data`. It can be the repo you deploy from.
-2. Add repository **Variables** (Settings → Secrets and variables → Actions →
-   Variables). These are coordinates, not credentials:
+1. Create a private repo, e.g. `gm-track-data`. Leave it empty; the app creates
+   `data.json` on its first sync.
+2. On the **code** repo, add repository **Variables** (Settings → Secrets and
+   variables → Actions → _Variables_ tab, not Secrets). These are coordinates,
+   not credentials:
    - `VITE_GH_OWNER` — your GitHub username
-   - `VITE_GH_REPO` — `gm2-data`
+   - `VITE_GH_REPO` — `gm-track-data`
    - `VITE_GH_BRANCH` — `main` (optional)
    - `VITE_GH_PATH` — `data.json` (optional)
-3. Create a **fine-grained personal access token**: that repo only, *Contents:
-   read and write*.
+3. Create a **fine-grained personal access token**: the data repo only,
+   *Contents: read and write*.
 4. Open the app on each phone → **Setup → Sync, PIN and data** → paste the
    token. It is verified against the repo, then stored in that browser only. It
    is never bundled into the build and never committed.
@@ -73,12 +76,22 @@ To share data between two phones, point it at a **private** GitHub repo:
 For local development, copy `.env.example` to `.env` and fill the same values.
 Leave them empty to stay local-only.
 
-### Why private
+### Why two repos
 
-The file holds both people's body weight and waist measurements. FTrack, the
-sibling project this borrows from, uses a public repo so its dashboard can read
-without a token — that is not an acceptable trade here, so reads are
-authenticated too and each phone needs its own token.
+They answer two different questions.
+
+**The code repo is public** so GitHub Pages will serve it — Pages only publishes
+from a private repo on a paid plan. Making it public costs nothing, because the
+build contains no secret: the token is typed into each phone, never bundled.
+
+**The data repo is private** because `data.json` holds both people's body weight
+and waist and hip measurements. Those do not belong in a public repo, and git
+history would keep them there even if it were made private afterwards.
+
+FTrack, the sibling project this borrows from, keeps data in a public repo so
+its dashboard can read without a token. That trade is fine for fuel receipts and
+wrong for body measurements, so here reads are authenticated too and each phone
+needs its own token.
 
 ### How two phones stay in agreement
 
@@ -116,9 +129,13 @@ same code; being unlocked is per-device, per-session. Viewing is never gated.
 
 ## Deploying
 
-Push to `main` and the workflow in `.github/workflows/deploy.yml` builds and
-publishes to GitHub Pages. Commits that only change `data.json` are ignored, so
-logging a workout does not trigger a rebuild.
+Push to `main` and the workflow in `.github/workflows/deploy.yml` runs `lint`
+and `test`, then builds and publishes to GitHub Pages. A broken push fails
+before it deploys rather than after.
+
+Sync commits land in the *data* repo, so logging a workout never touches this
+one. The workflow still ignores `data.json` as a safety net, in case the two are
+ever combined.
 
 `base: './'` plus `HashRouter` means it works from any repo subpath with no
 server rewrites. Open the Pages URL on each phone and **Add to Home Screen** —

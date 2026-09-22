@@ -3,9 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-    # Every logged set is a commit to the data file. Rebuilding the site for
-    # each one would burn Actions minutes and queue deploys behind each other,
-    # so data writes are ignored here.
+    # Sync commits go to the separate private data repo, so they never reach
+    # this one. These stay as a safety net: if the data file ever lived here,
+    # every logged set would be a commit, and each would rebuild the site and
+    # queue deploys behind each other.
     paths-ignore:
       - 'data.json'
       - 'archive/**'
